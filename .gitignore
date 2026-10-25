@@ -1,0 +1,19 @@
+node_modules/
+.env
+.env*.local
+*.log
+.DS_Store
+
+# builds de l'app et moteur wasm copié depuis node_modules
+mobile/dist/
+mobile/dist-test/
+mobile/test-results/
+mobile/public/assets/sql-wasm.wasm
+*.apk
+*.aab
+*.jks
+*.p12
+*.keystore
+
+# consignes locales pour l'assistant (non publiées)
+CLAUDE.md

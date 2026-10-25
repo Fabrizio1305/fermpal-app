@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+
+        <activity
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
+            android:name=".MainActivity"
+            android:label="@string/title_activity_main"
+            android:theme="@style/AppTheme.NoActionBarLaunch"
+            android:launchMode="singleTask"
+            android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+
+        </activity>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"></meta-data>
+        </provider>
+    </application>
+
+    <!-- Permissions. Pas d'INTERNET : le carnet vit sur l'appareil, l'app n'a
+         rien à aller chercher (cadrage §6). La WebView charge les fichiers
+         embarqués via https://localhost servi par Capacitor, sans réseau.
+         POST_NOTIFICATIONS : rappels de phase locaux (Android 13+), demandée
+         seulement quand l'utilisateur active les rappels. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Usage personnel (23/10) : recettes IA (Gemini, avec la clé collée dans
+         Paramètres) et copies du carnet dans le kDrive. Le carnet lui-même reste
+         local et fonctionne sans réseau ; seules ces fonctions, une fois la clé
+         ou le kDrive configurés, parlent à Google et à Infomaniak (hôtes limités
+         par la CSP de mobile/index.html). -->
+    <uses-permission android:name="android.permission.INTERNET" />
+</manifest>

@@ -1,0 +1,10 @@
+# Analyse de secrets (gitleaks) : règles par défaut, plus une exception pour les
+# noms de phase des modèles de recette (`nameKey: "phases.…"`), que la règle
+# générique prend à tort pour des clés.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Noms de phase des modèles de recette (lib/recipeTypes.js)"
+regexTarget = "line"
+regexes = ['''nameKey:\s*"phases\.''']

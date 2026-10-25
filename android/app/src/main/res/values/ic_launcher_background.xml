@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Vert du logo (public/icon-512.png) : le fond adaptatif se fond avec l'icône. -->
+    <color name="ic_launcher_background">#166534</color>
+    <!-- Écran de lancement : crème de l'app (values-night : fond sombre). -->
+    <color name="splash_background">#F5F2EA</color>
+</resources>

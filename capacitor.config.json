@@ -1,0 +1,17 @@
+{
+  "appId": "com.fermpal.app",
+  "appName": "FermPal",
+  "webDir": "mobile/dist",
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#f5f2ea"
+  },
+  "plugins": {
+    "CapacitorSQLite": {
+      "androidIsEncryption": false
+    },
+    "SystemBars": {
+      "style": "LIGHT"
+    }
+  }
+}

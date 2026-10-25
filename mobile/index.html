@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <!-- Cible testable du cadrage §6 : le carnet gratuit ne fait aucune
+         requête distante. La CSP l'impose au niveau du navigateur : rien ne se
+         charge hors de l'application ('self') et les seules connexions
+         possibles sont celles des services de l'usage personnel (23/10) : Gemini
+         (recettes IA, avec la clé collée dans Paramètres) et le kDrive (copies
+         du carnet ; sur le téléphone, appels natifs). Les scripts inline sont
+         nécessaires au pont natif Capacitor ; le wasm à sql.js en mode web. -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' blob: data: https://generativelanguage.googleapis.com https://api.infomaniak.com; object-src 'none'; base-uri 'self'; form-action 'none'"
+    />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f5f2ea" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#16140f" media="(prefers-color-scheme: dark)" />
+    <title>FermPal</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

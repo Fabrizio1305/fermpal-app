@@ -1,0 +1,96 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Évite le zoom auto sur iOS quand un champ < 16px reçoit le focus */
+@media (max-width: 480px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Boutons d'action dans les listes : icône + texte sur desktop, icône seule sur mobile */
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 8px 12px;
+  /* Même plancher tactile que btnP/btnS dans lib/uiStyles.js. Ces boutons ont
+     leur propre style CSS et étaient restés à 35 px alors que tout le reste est
+     passé à 44 px — or ce sont eux qui portent les actions destructives. */
+  min-height: 44px;
+  border-radius: 9px;
+  /* Taille de l'ICÔNE : l'emoji est un nœud de texte direct, il suit donc le
+     font-size du bouton. Le libellé est ramené à 13 px juste en dessous. */
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  border: 1.5px solid var(--fp-line, #e7e5e4);
+  background: var(--fp-soft, #f5f0eb);
+  color: var(--fp-muted, #78716c);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.action-btn .btn-label {
+  font-size: 13px;
+}
+
+/* ⚠️ Un emoji IGNORE la propriété `color` : il se rend dans ses propres
+   couleurs. Le rouge de `.action-btn.danger` ne teintait donc que le libellé —
+   masqué sur mobile. Il restait une boîte rose très pâle avec un petit
+   pictogramme gris, impossible à distinguer des actions voisines (retour
+   d'usage du 30/07 : « pas clair, donc risque d'erreur »).
+   C'est le BOUTON qui doit porter le signal, pas son icône : bordure rouge
+   franche et fond plus soutenu. */
+.action-btn.danger {
+  background: var(--fp-danger-chip, #fee2e2);
+  border-color: var(--fp-danger, #dc2626);
+  color: var(--fp-danger-text, #b91c1c);
+}
+
+.action-btn.primary {
+  background: var(--fp-green, #166534);
+  border-color: transparent;
+  color: var(--fp-on-green, #fff);
+}
+
+.action-btn.primary .btn-label {
+  color: var(--fp-on-green, #fff);
+}
+
+.action-btn .btn-label {
+  display: inline;
+}
+
+@media (max-width: 520px) {
+  .action-btn {
+    padding: 8px 10px;
+  }
+  .action-btn .btn-label {
+    display: none;
+  }
+  /* L'action PRINCIPALE garde son libellé, même sur mobile. Réduites à leurs
+     seules icônes, « démarrer un brassin » et « modifier la recette » se
+     confondaient (retour d'usage du 30/07, issue #18) : une icône de plus ne
+     suffit pas, il faut le mot. Les deux actions secondaires restent en icône
+     seule — elles sont récupérables d'un coup d'œil au contexte. */
+  .action-btn.primary .btn-label {
+    display: inline;
+  }
+}

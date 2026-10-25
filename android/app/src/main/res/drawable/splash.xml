@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Écran de lancement (Android < 12 ; sur 12+, le système affiche l'icône du
+     lanceur sur windowSplashScreenBackground) : fond de l'app et logo centré. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/splash_background"/>
+    <item android:gravity="center">
+        <bitmap android:src="@mipmap/ic_launcher_foreground" android:gravity="center"/>
+    </item>
+</layer-list>

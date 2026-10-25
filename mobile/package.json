@@ -1,0 +1,6 @@
+{
+  "name": "fermpal-mobile",
+  "private": true,
+  "type": "module",
+  "description": "Carnet local FermPal (React + Vite + Capacitor + SQLite). Les dépendances vivent dans le package.json racine ; ce fichier ne sert qu'à déclarer les modules ES de ce dossier pour Node (tests)."
+}

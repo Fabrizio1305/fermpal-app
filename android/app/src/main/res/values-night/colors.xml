@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Mode sombre : même fond que l'app (variable fp-bg de mobile/src/theme.css). -->
+    <color name="splash_background">#16140F</color>
+</resources>

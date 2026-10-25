@@ -1,0 +1,113 @@
+/* Thème de l'app embarquée : valeurs des tokens de lib/uiStyles.js.
+   Trois états : `data-theme="light"` ou `"dark"` sur <html> (choix dans le
+   menu, mémorisé sur l'appareil), sinon le réglage du téléphone
+   (prefers-color-scheme). Le mode clair est la référence : ses valeurs sont
+   celles des replis dans uiStyles.js, donc identiques au site. */
+
+:root {
+  color-scheme: light;
+  --fp-green: #166534;
+  --fp-green-dark: #14532d;
+  --fp-amber: #e8a030;
+  --fp-bg: #f5f2ea;
+  --fp-surface: #fff;
+  --fp-border: #eee9df;
+  --fp-text: #1c1917;
+  --fp-muted: #78716c;
+  --fp-faint: #a8a29e;
+  --fp-danger: #dc2626;
+  --fp-danger-chip: #fee2e2;
+  --fp-danger-text: #b91c1c;
+  --fp-success-bg: #ecfdf5;
+  --fp-success-border: #a7f3d0;
+  --fp-line: #e7e5e4;
+  --fp-soft: #f5f0eb;
+  --fp-row: #f9f7f4;
+  --fp-green-soft: #f0fdf4;
+  --fp-green-soft-border: #bbf7d0;
+  --fp-green-chip: #dcfce7;
+  --fp-amber-soft: #fffbeb;
+  --fp-amber-soft-border: #fde68a;
+  --fp-amber-text: #78350f;
+  --fp-danger-soft: #fef2f2;
+  --fp-on-green: #fff;
+  --fp-overlay: rgba(0, 0, 0, 0.5);
+  --fp-warn: #f59e0b;
+}
+
+/* Mode sombre : même identité (vert forêt, ambre), surfaces sombres chaudes
+   plutôt que noir pur, contrastes tenus pour les petits textes. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --fp-green: #4ade80;
+    --fp-green-dark: #22c55e;
+    --fp-amber: #f4b350;
+    --fp-bg: #16140f;
+    --fp-surface: #221f19;
+    --fp-border: #2f2b24;
+    --fp-text: #f2eee6;
+    --fp-muted: #b3ab9f;
+    --fp-faint: #7d766c;
+    --fp-danger: #f87171;
+    --fp-danger-chip: #3b1c1c;
+    --fp-danger-text: #fca5a5;
+    --fp-success-bg: #14301f;
+    --fp-success-border: #1f5a37;
+    --fp-line: #3a352d;
+    --fp-soft: #2a261f;
+    --fp-row: #1d1a15;
+    --fp-green-soft: #14301f;
+    --fp-green-soft-border: #1f5a37;
+    --fp-green-chip: #1f4d31;
+    --fp-amber-soft: #2e2410;
+    --fp-amber-soft-border: #5a4514;
+    --fp-amber-text: #fbd38d;
+    --fp-danger-soft: #2f1717;
+    --fp-on-green: #0b1a10;
+    --fp-overlay: rgba(0, 0, 0, 0.65);
+    --fp-warn: #fbbf24;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --fp-green: #4ade80;
+  --fp-green-dark: #22c55e;
+  --fp-amber: #f4b350;
+  --fp-bg: #16140f;
+  --fp-surface: #221f19;
+  --fp-border: #2f2b24;
+  --fp-text: #f2eee6;
+  --fp-muted: #b3ab9f;
+  --fp-faint: #7d766c;
+  --fp-danger: #f87171;
+  --fp-danger-chip: #3b1c1c;
+  --fp-danger-text: #fca5a5;
+  --fp-success-bg: #14301f;
+  --fp-success-border: #1f5a37;
+  --fp-line: #3a352d;
+  --fp-soft: #2a261f;
+  --fp-row: #1d1a15;
+  --fp-green-soft: #14301f;
+  --fp-green-soft-border: #1f5a37;
+  --fp-green-chip: #1f4d31;
+  --fp-amber-soft: #2e2410;
+  --fp-amber-soft-border: #5a4514;
+  --fp-amber-text: #fbd38d;
+  --fp-danger-soft: #2f1717;
+  --fp-on-green: #0b1a10;
+  --fp-overlay: rgba(0, 0, 0, 0.65);
+  --fp-warn: #fbbf24;
+}
+
+html, body {
+  background: var(--fp-bg);
+  color: var(--fp-text);
+}
+
+/* Les champs natifs (date, select, number) suivent le thème via color-scheme ;
+   on aligne aussi leur texte de remplacement. */
+input::placeholder, textarea::placeholder {
+  color: var(--fp-faint);
+}
