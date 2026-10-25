@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sauvegarde Android vers le compte Google (Android 11 et avant) : le carnet oui ;
+     le stockage du WebView non (app_webview/ : clé Gemini, jeton kDrive, réglages),
+     pour que ces accès restent sur le téléphone, comme l'app le promet. -->
+<full-backup-content>
+    <exclude domain="root" path="app_webview/" />
+</full-backup-content>
