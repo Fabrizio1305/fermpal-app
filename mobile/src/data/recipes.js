@@ -25,7 +25,7 @@ function parseTags(text) {
 }
 
 function rowToRecipe(r) {
-  return { ...r, tags: parseTags(r.tags), is_ai_generated: !!r.is_ai_generated };
+  return { ...r, tags: parseTags(r.tags), is_ai_generated: !!r.is_ai_generated, archived: !!r.archived };
 }
 
 function rowToIngredient(r) {
@@ -38,9 +38,28 @@ function numOrNull(v) {
   return Number.isFinite(n) ? n : null;
 }
 
-export async function listRecipes(db) {
-  const rows = await db.query("select * from recipes order by created_at desc, title asc");
+// Les recettes d'archive (version brassée d'un brassin passé) restent hors de
+// la liste habituelle ; `archived: true` ne rend qu'elles.
+export async function listRecipes(db, { archived = false } = {}) {
+  const rows = await db.query("select * from recipes where archived = ? order by created_at desc, title asc", [archived ? 1 : 0]);
   return rows.map(rowToRecipe);
+}
+
+export async function countArchivedRecipes(db) {
+  const rows = await db.query("select count(*) as c from recipes where archived = 1");
+  return Number(rows[0].c);
+}
+
+// Brassins d'une recette, y compris ceux de ses recettes d'archive : tout
+// l'historique d'une bière, quelle que soit la version brassée.
+export async function listRecipeBatches(db, recipeId) {
+  return db.query(
+    `select b.id, b.title, b.status, b.rating, b.created_at from batches b
+     join recipes r on r.id = b.recipe_id
+     where r.id = ? or r.archive_of = ?
+     order by b.created_at desc, b.id`,
+    [recipeId, recipeId],
+  );
 }
 
 export async function countRecipes(db) {
@@ -67,6 +86,10 @@ export async function listTagsAndStyles(db) {
   const styles = [...new Set(rows.map((r) => r.style).filter(Boolean))].sort();
   return { tags, styles };
 }
+
+// Valeurs cibles (densités, alcool, amertume, couleur) : écrites à la création
+// (import, duplication), conservées telles quelles à l'édition.
+export const TARGET_FIELDS = ["expected_og", "expected_fg", "expected_abv", "expected_ibu", "expected_ebc"];
 
 // Forme d'entrée de saveRecipe :
 //   recipe      : { title, type, batch_size_ref, style, instructions, tags, source_type? }
@@ -95,9 +118,11 @@ export async function saveRecipe(db, { id = null, recipe, phases = [], ingredien
     if (!recipeId) {
       recipeId = newId();
       await db.run(
-        `insert into recipes (id, title, type, source_type, is_ai_generated, instructions, batch_size_ref, style, boil_time, current_version, tags, created_at, updated_at)
-         values (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?)`,
-        [recipeId, recipeRow.title, recipeRow.type, recipe.source_type || "manual", recipe.is_ai_generated ? 1 : 0, recipeRow.instructions, recipeRow.batch_size_ref, recipeRow.style, numOrNull(recipe.boil_time), recipeRow.tags, ts, ts],
+        `insert into recipes (id, title, type, source_type, is_ai_generated, instructions, batch_size_ref, style, boil_time,
+           expected_og, expected_fg, expected_abv, expected_ibu, expected_ebc, current_version, tags, created_at, updated_at)
+         values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?)`,
+        [recipeId, recipeRow.title, recipeRow.type, recipe.source_type || "manual", recipe.is_ai_generated ? 1 : 0, recipeRow.instructions, recipeRow.batch_size_ref, recipeRow.style, numOrNull(recipe.boil_time),
+          ...TARGET_FIELDS.map((f) => numOrNull(recipe[f])), recipeRow.tags, ts, ts],
       );
     } else {
       const [prev] = await db.query("select * from recipes where id = ?", [recipeId]);

@@ -24,6 +24,7 @@ export const EXPORT_FORMAT_VERSION = 1;
 const TABLES_BY_SCHEMA = {
   1: ["recipes", "recipe_phases", "recipe_ingredients", "recipe_versions"],
   2: DATA_TABLES,
+  3: DATA_TABLES,
 };
 
 export function tablesForSchema(version) {
@@ -147,6 +148,7 @@ export async function verifyBundle(bundle, { schemaVersion = SCHEMA_VERSION } = 
   const recipeIds = ids(data.recipes, "Recette");
   for (const r of data.recipes) {
     if (typeof r.title !== "string" || !r.title.trim()) throw new BundleError("bad_row", `Recette ${r.id} sans titre.`);
+    requireRef(r, "archive_of", recipeIds, "Recette", { nullable: true });
   }
   const phaseIds = ids(data.recipe_phases, "Phase");
   const phaseRecipe = new Map(data.recipe_phases.map((p) => [p.id, p.recipe_id]));

@@ -22,7 +22,7 @@ import { inp, btnP, btnSLink as btnS, card, COLORS } from "@/lib/uiStyles";
 import { MobileMenu } from "../components/MobileShell.jsx";
 import { useDb } from "../App.jsx";
 import { INGREDIENT_CATALOG, STYLE_CATALOG, catalogName } from "../data/catalogs.js";
-import { getRecipeFull, saveRecipe, duplicateRecipe, listTagsAndStyles } from "../data/recipes.js";
+import { getRecipeFull, saveRecipe, duplicateRecipe, listTagsAndStyles, listRecipeBatches } from "../data/recipes.js";
 import { listStock, listAliases } from "../data/stock.js";
 import { addShoppingRows } from "../data/shopping.js";
 import { createBatchForRecipe, upsertAlias } from "../data/batches.js";
@@ -64,6 +64,7 @@ function emptyLine() {
     sub_type: "",
     alpha_acid_pct: "",
     timing: "",
+    notes: "",
     is_starter: false,
   };
 }
@@ -100,6 +101,7 @@ function linesFromRows(rows, idMap) {
     sub_type: r.sub_type || "",
     alpha_acid_pct: r.alpha_acid_pct != null ? String(r.alpha_acid_pct) : "",
     timing: r.timing || "",
+    notes: r.notes || "",
     is_starter: !!r.is_starter,
   }));
 }
@@ -118,6 +120,8 @@ export default function RecipeEdit() {
   const [stock, setStock] = useState([]);
   const [aliases, setAliases] = useState([]);
   const [recipeBatches, setRecipeBatches] = useState([]);
+  // Recette telle qu'enregistrée : valeurs cibles et statut d'archive (lecture seule ici).
+  const [saved, setSaved] = useState(null);
   const [showBatches, setShowBatches] = useState(false);
   const [stockEditItem, setStockEditItem] = useState(null);
   const [stockEditQty, setStockEditQty] = useState("");
@@ -191,7 +195,7 @@ export default function RecipeEdit() {
       if (cancelled) return;
       setStock(st);
       setAliases(al);
-      if (!isNew) setRecipeBatches(await db.query("select * from batches where recipe_id = ? order by created_at desc", [params.id]));
+      if (!isNew) setRecipeBatches(await listRecipeBatches(db, params.id));
       setAllRecipeTags(knownTags);
       setKnownStyles(styles);
       if (!isNew) {
@@ -209,6 +213,7 @@ export default function RecipeEdit() {
         setInstructions(full.recipe.instructions || "");
         setTags(full.recipe.tags || []);
         setCurrentVersion(full.recipe.current_version || 1);
+        setSaved(full.recipe);
         const { phases: loadedPhases, idMap } = phasesFromRows(full.phases);
         setPhases(loadedPhases);
         if (full.ingredients.length > 0) setLines(linesFromRows(full.ingredients, idMap));
@@ -252,7 +257,7 @@ export default function RecipeEdit() {
         id: isNew ? null : params.id,
         recipe: { title, type, batch_size_ref: batchSizeRef, style, instructions, tags },
         phases: phases.map((p) => ({ key: p.tempId, id: p.realId, name: p.name, duration_value: p.durationValue, duration_unit: p.durationUnit, temperature_target: p.temperatureTarget, notes: p.notes })),
-        ingredients: lines.map((l) => ({ phaseKey: l.phaseTempId || null, category: l.category, name: l.name, amount: l.amount, unit: l.unit, sub_type: l.sub_type, alpha_acid_pct: l.alpha_acid_pct, timing: l.timing, is_starter: l.is_starter })),
+        ingredients: lines.map((l) => ({ phaseKey: l.phaseTempId || null, category: l.category, name: l.name, amount: l.amount, unit: l.unit, sub_type: l.sub_type, alpha_acid_pct: l.alpha_acid_pct, timing: l.timing, notes: l.notes, is_starter: l.is_starter })),
       });
       savedSnapshot.current = liveSnapshot.current;
       toast(t("recipe.recipeSaved"));
@@ -392,6 +397,31 @@ export default function RecipeEdit() {
               </div>
             )}
           </div>
+
+          {saved?.archived && (
+            <div style={{ background: COLORS.amberSoft, border: `1px solid ${COLORS.amberSoftBorder}`, borderRadius: 12, padding: "12px 14px", marginBottom: 16, fontSize: 12.5, color: COLORS.amberText, lineHeight: 1.5 }} data-testid="recipe-archived">
+              🗄️ {t("recipe.archivedBanner")}
+              {saved.archive_of && (
+                <div style={{ marginTop: 6 }}>
+                  <Link href={`/app/recipes/${saved.archive_of}`} style={{ color: COLORS.amberText, fontWeight: 700 }}>{t("recipe.seeCurrentRecipe")} →</Link>
+                </div>
+              )}
+            </div>
+          )}
+
+          {saved && [saved.expected_og, saved.expected_fg, saved.expected_abv, saved.expected_ibu, saved.expected_ebc].some((v) => v != null) && (
+            <div style={{ ...card, marginBottom: 16, fontSize: 13, color: COLORS.text }} data-testid="recipe-targets">
+              🎯 <span style={{ fontWeight: 700 }}>{t("recipe.targets")}</span>
+              {" · "}
+              {[
+                saved.expected_og != null && `${t("recipe.og")} ${Number(saved.expected_og).toFixed(3)}`,
+                saved.expected_fg != null && `${t("recipe.fg")} ${Number(saved.expected_fg).toFixed(3)}`,
+                saved.expected_abv != null && `${saved.expected_abv} %`,
+                saved.expected_ibu != null && `${saved.expected_ibu} IBU`,
+                saved.expected_ebc != null && `${saved.expected_ebc} EBC`,
+              ].filter(Boolean).join(" · ")}
+            </div>
+          )}
 
           {!isNew && showBatches && (
             <div style={{ ...card, marginBottom: 16 }}>
@@ -578,6 +608,11 @@ export default function RecipeEdit() {
                           );
                         })()}
                       </div>
+                      {!l.open && (l.timing || l.notes) && (
+                        <div style={{ fontSize: 12, color: COLORS.muted, paddingLeft: 19, lineHeight: 1.4 }} data-testid="line-details">
+                          {[l.timing, l.notes].filter(Boolean).join(" · ")}
+                        </div>
+                      )}
                       {l.open && (
                         <>
                           <div style={{ display: "flex", gap: 6 }}>
@@ -606,8 +641,12 @@ export default function RecipeEdit() {
                               <input style={{ ...inp, flex: 2 }} placeholder={t("recipe.timingEG60minBoil")} value={l.timing} onChange={(e) => updateLine(l.tempId, { timing: e.target.value })} />
                             </div>
                           ) : (
-                            <input style={inp} placeholder={t("recipe.subTypeOptionalEG")} value={l.sub_type} onChange={(e) => updateLine(l.tempId, { sub_type: e.target.value })} />
+                            <>
+                              <input style={inp} placeholder={t("recipe.subTypeOptionalEG")} value={l.sub_type} onChange={(e) => updateLine(l.tempId, { sub_type: e.target.value })} />
+                              {(l.timing || type === "biere" || type === "braggot") && <input style={inp} placeholder={t("recipe.timingEG60minBoil")} value={l.timing} onChange={(e) => updateLine(l.tempId, { timing: e.target.value })} />}
+                            </>
                           )}
+                          <input style={inp} placeholder={t("recipe.ingredientNotesPh")} value={l.notes} onChange={(e) => updateLine(l.tempId, { notes: e.target.value })} />
                           <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: COLORS.muted, cursor: "pointer" }}>
                             <input type="checkbox" checked={l.is_starter} onChange={(e) => updateLine(l.tempId, { is_starter: e.target.checked })} />
                             {t("recipe.reusableStarterGrainsScoby")}

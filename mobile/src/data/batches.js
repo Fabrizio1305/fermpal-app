@@ -86,6 +86,8 @@ export async function createBatchForRecipe(db, { recipe, title, volume, starter 
   return db.transaction(async () => {
     const r = rowToRecipe(await one(db, "select * from recipes where id = ?", [recipe.id]));
     if (!r) throw new Error(t("common.recipeNotFound", null, lang));
+    // Rebrasser une recette d'archive la remet dans la liste des recettes.
+    if (r.archived) await db.run("update recipes set archived = 0, updated_at = ? where id = ?", [ts, r.id]);
     let source = null;
     if (reuse > 0) {
       source = await one(db, "select id, title, culture_generation from batches where id = ?", [starter.batchId]);

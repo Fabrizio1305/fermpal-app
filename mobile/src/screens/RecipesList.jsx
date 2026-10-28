@@ -9,7 +9,7 @@ import { useToast, useConfirm } from "@/lib/UiContext";
 import { inp, btnPLink as btnP, btnSLink as btnS, card, COLORS } from "@/lib/uiStyles";
 import MobileShell from "../components/MobileShell.jsx";
 import { useDb } from "../App.jsx";
-import { listRecipes, deleteRecipe } from "../data/recipes.js";
+import { listRecipes, deleteRecipe, countArchivedRecipes } from "../data/recipes.js";
 import { useT } from "@/lib/i18n/useT";
 
 export default function RecipesList() {
@@ -22,22 +22,27 @@ export default function RecipesList() {
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState("");
   const [filterTag, setFilterTag] = useState("");
+  // Recettes d'archive (versions brassées lors de brassins passés) : vue à part.
+  const [showArchived, setShowArchived] = useState(false);
+  const [archivedCount, setArchivedCount] = useState(0);
 
   const reload = async () => {
-    setRecipes(await listRecipes(db));
+    setRecipes(await listRecipes(db, { archived: showArchived }));
+    setArchivedCount(await countArchivedRecipes(db));
     setLoaded(true);
   };
 
   useEffect(() => {
     reload();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [db]);
+  }, [db, showArchived]);
 
   const remove = async (id, title) => {
     if (!(await confirm(t("recipes.deleteRecipe", { title })))) return;
     try {
       await deleteRecipe(db, id);
       setRecipes((prev) => prev.filter((r) => r.id !== id));
+      if (showArchived) setArchivedCount((n) => n - 1);
       toast(t("recipes.recipeDeleted"));
     } catch (err) {
       toast((t("common.error")) + err.message, "error");
@@ -92,6 +97,19 @@ export default function RecipesList() {
             </button>
           ))}
         </div>
+      )}
+
+      {showArchived ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 12 }}>
+          <div style={{ fontSize: 12.5, color: COLORS.muted, lineHeight: 1.5 }}>{t("recipes.archivesHint")}</div>
+          <button className="action-btn" style={{ fontSize: 12, padding: "5px 12px", alignSelf: "flex-start" }} onClick={() => setShowArchived(false)} data-testid="recipes-mine">
+            ← {t("recipes.myRecipes")}
+          </button>
+        </div>
+      ) : archivedCount > 0 && (
+        <button className="action-btn" style={{ fontSize: 12, padding: "5px 12px", marginBottom: 12 }} onClick={() => setShowArchived(true)} data-testid="recipes-archives">
+          🗄️ {t("recipes.archives", { count: archivedCount })}
+        </button>
       )}
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>

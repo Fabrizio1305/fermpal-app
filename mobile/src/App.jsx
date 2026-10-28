@@ -21,6 +21,7 @@ import ShoppingScreen from "./screens/ShoppingScreen.jsx";
 import BatchesList from "./screens/BatchesList.jsx";
 import BatchDetail from "./screens/BatchDetail.jsx";
 import ImportBeerXml from "./screens/ImportBeerXml.jsx";
+import ImportBrewfather from "./screens/ImportBrewfather.jsx";
 import AiRecipe from "./screens/AiRecipe.jsx";
 import { platformName } from "./db/openDatabase.js";
 import { autoBackupIfDue } from "./data/cloudBackups.js";
@@ -62,6 +63,7 @@ const ROUTES = [
   ["/app", Dashboard],
   ["/app/recipes", RecipesList],
   ["/app/recipes/import", ImportBeerXml],
+  ["/app/recipes/import-brewfather", ImportBrewfather],
   ["/app/recipes/ai", AiRecipe],
   ["/app/recipes/:id", RecipeEdit],
   ["/app/stock", StockScreen],

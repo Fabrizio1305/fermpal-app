@@ -20,7 +20,7 @@ function parseJson(text, fallback) {
 
 export function rowToRecipe(r) {
   if (!r) return null;
-  return { ...r, tags: Array.isArray(parseJson(r.tags, [])) ? parseJson(r.tags, []) : [], is_ai_generated: !!r.is_ai_generated };
+  return { ...r, tags: Array.isArray(parseJson(r.tags, [])) ? parseJson(r.tags, []) : [], is_ai_generated: !!r.is_ai_generated, archived: !!r.archived };
 }
 
 export function rowToRecipeIngredient(r) {

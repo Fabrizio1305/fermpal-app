@@ -6,7 +6,7 @@
 // Chaque entrée de MIGRATIONS est appliquée dans UNE transaction avec son
 // enregistrement dans schema_migrations : soit tout, soit rien.
 
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 export const MIGRATIONS = [
   {
@@ -208,6 +208,24 @@ create table stock_operation_requests (
   result text not null,
   created_at text not null
 );
+`,
+  },
+  {
+    // Import d'un export Brewfather : `external_id` (identifiant d'origine,
+    // « brewfather:… ») évite les doublons quand on réimporte le même fichier.
+    // Une recette d'archive (`archived`) est la recette telle que brassée lors
+    // d'un brassin passé, quand elle diffère de la recette actuelle
+    // (`archive_of`) : masquée de la liste, elle y revient si on la rebrasse.
+    version: 3,
+    name: "import_brewfather",
+    sql: `
+alter table recipes add column external_id text;
+alter table recipes add column archived integer not null default 0;
+alter table recipes add column archive_of text references recipes(id) on delete set null;
+alter table batches add column external_id text;
+create index recipes_external on recipes(external_id);
+create index recipes_archive_of on recipes(archive_of);
+create index batches_external on batches(external_id);
 `,
   },
 ];

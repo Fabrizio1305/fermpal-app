@@ -341,6 +341,9 @@ export default function BatchDetail() {
   const currentPhase = phases.find((p) => p.id === batch.current_phase_id);
   const currentPhaseIdx = phases.findIndex((p) => p.id === batch.current_phase_id);
   const currentIngredients = currentPhase ? batchIngredients.filter((bi) => bi.phase_id === currentPhase.id) : [];
+  // Moment d'ajout (houblons, sucre…) repris de la ligne de recette de même phase et même nom.
+  const timingOf = new Map(recipeIngredients.filter((ri) => ri.timing).map((ri) => [`${ri.phase_id}|${ri.name.trim().toLowerCase()}`, ri.timing]));
+  const lineTiming = (bi) => timingOf.get(`${bi.phase_id}|${bi.name.trim().toLowerCase()}`);
   const timingPill = {
     ontime: { background: "rgba(255,255,255,0.18)", color: COLORS.onGreen },
     due_soon: { background: COLORS.amber, color: "#1c1917" }, // ambre : texte sombre dans les deux thèmes
@@ -541,7 +544,7 @@ export default function BatchDetail() {
                         {items.map((bi) => (
                           <li key={bi.id} style={{ opacity: bi.deducted ? 0.65 : 1 }}>
                             <span aria-hidden="true">{bi.is_starter ? "♻️ " : bi.deducted ? "✓ " : "○ "}</span>
-                            {bi.name} — {Number(bi.amount)}{bi.unit}
+                            {bi.name} — {Number(bi.amount)}{bi.unit}{lineTiming(bi) ? ` · ${lineTiming(bi)}` : ""}
                           </li>
                         ))}
                       </ul>

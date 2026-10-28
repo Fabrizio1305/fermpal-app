@@ -285,6 +285,7 @@ export default function SettingsScreen() {
         </div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <Link href="/app/recipes/import" style={{ ...btnS, textDecoration: "none" }} data-testid="settings-beerxml">📥 {t("settings.beerxmlRecipe")}</Link>
+          <Link href="/app/recipes/import-brewfather" style={{ ...btnS, textDecoration: "none" }} data-testid="settings-brewfather">🍺 {t("settings.brewfatherExport")}</Link>
           <button style={btnS} onClick={() => csvRef.current?.click()} disabled={!!busy || ops.busy}>📄 {t("settings.stockFromACsv")}</button>
           <input ref={csvRef} type="file" accept=".csv,text/csv" onChange={onCsvFile} style={{ display: "none" }} data-testid="csv-input" />
         </div>
